@@ -1,0 +1,9 @@
+name: Stasco CKEditor custom plugin
+type: module
+description: Create custom plugin for CKEditor.
+dependencies:
+  - linkit
+  - imce
+core: 8.x
+core_version_requirement: ^8 || ^9 || ^10
+package: Stasco

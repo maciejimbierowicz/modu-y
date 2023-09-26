@@ -1,0 +1,24 @@
+/**
+ * @styles uploadfile-editor-dialog-form
+ * Styles for the custom Upload file dialog form
+ */
+
+/* NOTE: Temporarily hiding with CSS, to be introduced later */
+*[data-drupal-selector='edit-upload-fieldset-file-info'] .form-item-upload-fieldset-file-info-file {
+  display: none;
+}
+
+/* NOTE: Temporarily hiding with CSS, to be introduced later */
+*[data-drupal-selector='edit-upload-fieldset-file-info'] .form-item-upload-fieldset-file-info-copies {
+  display: none;
+}
+
+/* NOTE: Temporarily hiding with CSS, to be introduced later */
+*[data-drupal-selector='edit-upload-fieldset-file-info'] .form-item-upload-fieldset-file-info-retention {
+  display: none;
+}
+
+/* NOTE: Temporarily hiding with CSS, to be introduced later */
+*[data-drupal-selector='edit-upload-fieldset-file-info'] .form-item-upload-fieldset-file-info-version {
+  display: none;
+}

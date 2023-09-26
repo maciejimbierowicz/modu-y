@@ -1,0 +1,8 @@
+{% if incoming_links %}
+  <h3>{{ 'Incoming links'|t }}</h3>
+  <ul>
+  {% for incoming_link in incoming_links %}
+    <li class="incoming-links">{{ incoming_link }}</li>
+  {% endfor %}
+  </ul>   
+{% endif %}

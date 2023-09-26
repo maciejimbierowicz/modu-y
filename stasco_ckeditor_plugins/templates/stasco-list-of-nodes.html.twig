@@ -1,0 +1,6 @@
+{% if data %}
+  <h2>{{ 'File usages:'|trans }}</h2>
+  {% for node in data %}
+    <div><span>{{ node.link }}</span></div>
+  {% endfor %}
+{% endif %}

@@ -1,0 +1,49 @@
+stasco_ckeditor_plugins.autotitle:
+  version: VERSION
+  js:
+    js/autotitle.js: {}
+  dependencies:
+    - linkit/linkit.base
+    - linkit/linkit.autocomplete
+
+stasco_ckeditor_plugins.entitydelete:
+  js:
+    js/custom.js: {}
+  dependencies:
+    - core/jquery
+
+stasco_ckeditor_plugins.wordpasting:
+  css:
+    theme:
+      css/wordpasting.css: {}
+
+stasco_ckeditor_plugins.uploadfile:
+  css:
+    theme:
+      css/uploadfile.css: {}
+
+stasco_ckeditor_plugins.edituploadedfile:
+  css:
+    theme:
+      css/edituploadedfile.css: {}
+
+drupal.imce.filemeta:
+  version: VERSION
+  js:
+    js/plugins/filemeta/imce.filemeta.js: {}
+  dependencies:
+    - imce/drupal.imce
+
+drupal.imce.exitfilemanager:
+  version: VERSION
+  js:
+    js/plugins/exitfilemanager/imce.exitfilemanager.js: {}
+  dependencies:
+    - imce/drupal.imce
+
+stasco_ckeditor_plugins.imce.rename:
+  version: VERSION
+  js:
+    js/plugins/rename/imce.rename.js: {}
+  dependencies:
+    - imce/drupal.imce

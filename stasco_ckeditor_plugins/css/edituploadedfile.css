@@ -1,0 +1,24 @@
+/**
+ * @styles edit-uploaded-file-form
+ * Styles for the custom Upload file dialog form
+ */
+
+/* NOTE: Temporarily hiding with CSS, to be introduced later */
+*[data-drupal-selector='edit-uploaded-file-form'] .form-item-file-info-file {
+  display: none;
+}
+
+/* NOTE: Temporarily hiding with CSS, to be introduced later */
+*[data-drupal-selector='edit-uploaded-file-form'] .form-item-file-info-copies {
+  display: none;
+}
+
+/* NOTE: Temporarily hiding with CSS, to be introduced later */
+*[data-drupal-selector='edit-uploaded-file-form'] .form-item-file-info-retention {
+  display: none;
+}
+
+/* NOTE: Temporarily hiding with CSS, to be introduced later */
+*[data-drupal-selector='edit-uploaded-file-form'] .form-item-file-info-version {
+  display: none;
+}

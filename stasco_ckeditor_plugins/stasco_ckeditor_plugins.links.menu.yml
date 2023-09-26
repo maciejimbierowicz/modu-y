@@ -1,0 +1,13 @@
+stasco_ckeditor_plugins.stasco_media:
+  title: 'Media'
+  route_name: stasco_ckeditor_plugins.stasco_media
+  parent: stasco.config
+stasco_ckeditor_plugins.stasco_uploaded_files:
+  title: 'Uploaded files'
+  route_name: stasco_ckeditor_plugins.stasco_uploaded_files
+  parent: stasco_ckeditor_plugins.stasco_media
+stasco_ckeditor_plugins.file_managing_config:
+  title: 'File managing config'
+  route_name: stasco_ckeditor_plugins.file_managing_config_form
+  parent: stasco.config_list
+

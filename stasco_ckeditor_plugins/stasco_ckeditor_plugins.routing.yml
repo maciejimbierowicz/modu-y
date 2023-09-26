@@ -1,0 +1,89 @@
+stasco_ckeditor_plugins.linkitextended_dialog:
+  path: '/stasco_ckeditor_plugins/dialog/linkitextended/{filter_format}'
+  defaults:
+    _form: '\Drupal\stasco_ckeditor_plugins\Form\LinkitExtendedEditorDialog'
+    _title: 'Add link'
+  requirements:
+    _entity_access: 'filter_format.use'
+  options:
+    _theme: ajax_base_page
+
+stasco_ckeditor_plugins.autocomplete:
+  path: '/linkitextended/autocomplete/{linkit_profile_id}'
+  defaults:
+    _controller: '\Drupal\stasco_ckeditor_plugins\Controller\CustomAutocompleteController::autocomplete'
+  requirements:
+    _access: 'TRUE'
+  options:
+    _theme: ajax_base_page
+
+stasco_ckeditor_plugins.note_caution_dialog:
+  path: '/stasco_ckeditor_plugins/dialog/note_caution/{filter_format}'
+  defaults:
+    _form: '\Drupal\stasco_ckeditor_plugins\Form\NoteCautionDialog'
+    _title: 'Add note ore caution'
+  requirements:
+    _entity_access: 'filter_format.use'
+  options:
+    _theme: ajax_base_page
+
+stasco_ckeditor_plugins.upload_file_dialog:
+  path: '/stasco_ckeditor_plugins/dialog/uploadfile/{filter_format}'
+  defaults:
+    _form: '\Drupal\stasco_ckeditor_plugins\Form\UploadFileDialog'
+    _title: 'Add link'
+  requirements:
+    _entity_access: 'filter_format.use'
+  options:
+    _theme: ajax_base_page
+
+stasco_ckeditor_plugins.word_pasting_dialog:
+  path: '/stasco_ckeditor_plugins/dialog/word-pasting/{filter_format}'
+  defaults:
+    _form: '\Drupal\stasco_ckeditor_plugins\Form\WordPastingDialog'
+    _title: 'Add Word element'
+  requirements:
+    _entity_access: 'filter_format.use'
+  options:
+    _theme: ajax_base_page
+
+stasco_ckeditor_plugins.stasco_media:
+  path: '/admin/config/media'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'Media'
+  requirements:
+    _permission: 'access stasco config'
+
+stasco_ckeditor_plugins.stasco_uploaded_files:
+  path: '/admin/config/media/uploaded-files'
+  defaults:
+    _controller: '\Drupal\imce\Controller\ImceController::page'
+    _title: 'Uploaded files'
+    scheme: null
+  requirements:
+    _permission: 'access stasco config'
+
+stasco_ckeditor_plugins.edit_uploaded_file:
+  path: '/admin/config/media/uploaded-files/{fid}/edit'
+  defaults:
+    _form: 'Drupal\stasco_ckeditor_plugins\Form\Admin\EditUploadedFileForm'
+    _title: 'Edit uploaded file'
+  requirements:
+    _permission: 'access stasco config'
+
+stasco_ckeditor_plugins.delete_uploaded_file:
+  path: '/admin/config/media/uploaded-files/{fid}/delete'
+  defaults:
+    _form: 'Drupal\stasco_ckeditor_plugins\Form\Admin\DeleteUploadedFileForm'
+    _title: 'Delete uploaded file'
+  requirements:
+    _permission: 'access stasco config'
+
+stasco_ckeditor_plugins.file_managing_config_form:
+  path: '/admin/config/stasco-config/file-managing-config'
+  defaults:
+    _form: '\Drupal\stasco_ckeditor_plugins\Form\Admin\FileManagingConfigForm'
+    _title: 'File managing configuration'
+  requirements:
+    _permission: 'access stasco config'

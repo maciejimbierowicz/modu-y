@@ -1,0 +1,10 @@
+/**
+ * @styles word-pasting-dialog-form
+ * Styles for the custom Word pasting dialog form
+ */
+
+.word-pasting-dialog-form .cke_top {
+  visibility: hidden;
+  height: 1px !important; /* Override inline CSS added by JS */
+  padding: 0;
+}

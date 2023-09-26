@@ -1,0 +1,97 @@
+<?php
+
+/**
+ * @file
+ * Install file.
+ */
+
+/**
+ * Implements hook_schema().
+ *
+ * Defines the database tables used by this module.
+ *
+ * @see hook_schema()
+ *
+ * @ingroup stasco_ckeditor_plugins
+ */
+function stasco_ckeditor_plugins_schema() {
+  $schema['stasco_incoming_links'] = [
+    'description' => 'Stores incoming links attached to a page.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key',
+      ],
+      'entity_id' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "Entity ID",
+      ],
+      'link_to_entity_id' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Link to entity ID',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'Node id' => ['entity_id'],
+      'Link to Entity ID' => ['link_to_entity_id'],
+    ],
+  ];
+
+  $schema['stasco_upload_file'] = [
+    'description' => 'Stores upload files attached to a page.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key',
+      ],
+      'fid' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'filename' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'file' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'copies' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'retention' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'version' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'fid' => ['fid'],
+    ],
+  ];
+
+  return $schema;
+}

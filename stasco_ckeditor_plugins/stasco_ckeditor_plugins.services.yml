@@ -1,0 +1,6 @@
+services:
+  stasco_ckeditor_plugins.upload_file_manager:
+      class: Drupal\stasco_ckeditor_plugins\UploadFileManager
+      arguments: ['@database', '@entity_type.manager', '@file.usage', '@stasco_ckeditor_plugins.batch_manager', '@messenger', '@file_system', '@file_url_generator']
+  stasco_ckeditor_plugins.batch_manager:
+        class: Drupal\stasco_ckeditor_plugins\BatchManager

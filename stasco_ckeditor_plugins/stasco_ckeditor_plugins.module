@@ -1,0 +1,308 @@
+<?php
+
+/**
+ * @file
+ * Module file.
+ */
+
+use Drupal\node\NodeInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\node\Entity\Node;
+use Drupal\Core\Link;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\views\Plugin\views\query\Sql;
+use Drupal\views\ViewExecutable;
+
+/**
+ * Implements hook_theme().
+ */
+function stasco_ckeditor_plugins_theme() {
+  return [
+    'incoming_links' => [
+      'variables' => [
+        'incoming_links' => [],
+      ],
+    ],
+    'uploaded_file_info' => [
+      'variables' => [
+        'data' => [],
+      ],
+    ],
+    'uploaded_file_for_replacing_info' => [
+      'variables' => [
+        'data' => [],
+      ],
+    ],
+    'stasco_list_of_nodes' => [
+      'variables' => [
+        'nodes' => [],
+      ],
+      'file' => 'stasco_ckeditor_plugins.theme.inc',
+    ],
+    'file_managing_error' => [
+      'variables' => [
+        'message' => [],
+      ],
+    ],
+    'file_managing_status' => [
+      'variables' => [
+        'message' => [],
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_form_BASE_ID_alter().
+ */
+function stasco_ckeditor_plugins_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $node = $form_state->getFormObject()->getEntity();
+  $nid = $node->id();
+  if (!empty($nid)) {
+    // Get incoming links for current node.
+    $incoming_links = stasco_ckeditor_plugins_page_incoming_links($nid);
+    if (!empty($incoming_links)) {
+      $form['incoming_links'] = [
+        '#theme' => 'incoming_links',
+        '#incoming_links' => $incoming_links,
+        '#weight' => 99,
+      ];
+    }
+  }
+}
+
+/**
+ * Implements hook_form_BASE_ID_alter().
+ */
+function stasco_ckeditor_plugins_form_node_confirm_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['actions']['submit']['#attributes']['stasco-data-delete-btn'] = '';
+  // Get node id from url.
+  $nid = \Drupal::routeMatch()->getRawParameter('node');
+  // Find if there are any incoming links attached to this node.
+  $query = \Drupal::database()->select('stasco_incoming_links', 'si');
+  $query->addField('si', 'entity_id');
+  $query->condition('si.link_to_entity_id', $nid);
+  $result = $query->execute()->fetchField();
+  // Checks the deleting node has incoming links.
+  if (!empty($result)) {
+    $form['#attached']['library'][] = 'stasco_ckeditor_plugins/stasco_ckeditor_plugins.entitydelete';
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function stasco_ckeditor_plugins_node_insert(EntityInterface $entity) {
+  $entity_id = $entity->id();
+  // Update records in the database table for incoming links.
+  if (isset($entity_id) && $entity->getEntityTypeId() == 'node') {
+    stasco_ckeditor_plugins_update_records($entity_id);
+    \Drupal::service('stasco_ckeditor_plugins.upload_file_manager')
+      ->updateFileUsages($entity);
+  }
+}
+
+/**
+ * Implements hook_entity_presave().
+ */
+function stasco_ckeditor_plugins_entity_update(EntityInterface $entity) {
+  $entity_id = $entity->id();
+  // Update records in the database table for incoming links.
+  if (isset($entity_id) && $entity->getEntityTypeId() == 'node') {
+    stasco_ckeditor_plugins_update_records($entity_id);
+    \Drupal::service('stasco_ckeditor_plugins.upload_file_manager')
+      ->updateFileUsages($entity);
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function stasco_ckeditor_plugins_entity_delete(EntityInterface $entity) {
+  $entity_id = $entity->id();
+  // Update records in the database table for incoming links.
+  if (isset($entity_id) && $entity->getEntityTypeId() == 'node') {
+    stasco_ckeditor_plugins_update_data($entity_id);
+    \Drupal::service('stasco_ckeditor_plugins.upload_file_manager')
+      ->deleteFileUsages($entity);
+  }
+}
+
+/**
+ * Update records on entity insert.
+ *
+ * @param int $entity_id
+ *   Entity id to be updated in the custom table.
+ */
+function stasco_ckeditor_plugins_update_records($entity_id) {
+  $entity = Node::load($entity_id);
+  $conn = \Drupal::database();
+  if ($entity->hasField('body') && $conn->schema()
+    ->tableExists('stasco_incoming_links')) {
+    $body = $entity->get('body')->value;
+
+    // First all the references from stasco_incoming links table in this entity.
+    stasco_ckeditor_plugins_update_data($entity_id);
+
+    // Get all the links from body part.
+    \phpQuery::newDocument($body);
+    $links = pq('a[linkextended]');
+    if ($links->elements) {
+      /** @var \DOMElement $element */
+      foreach ($links->elements as $element) {
+        $href = $element->getAttribute('href');
+        // Get node id from the string.
+        // @todo so we should use only canonical path for nodes.
+        $link_id = substr($href, strrpos($href, '/') + 1);
+        // Check if it is a valid node id.
+        if (is_object(Node::load($link_id))) {
+          $conn->insert('stasco_incoming_links')->fields(
+            [
+              'entity_id' => $entity_id,
+              'link_to_entity_id' => $link_id,
+            ]
+          )->execute();
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Remove old entries from the stasco_incoming links table.
+ *
+ * @param int $entity_id
+ *   Entity id to be removed from the custom table.
+ */
+function stasco_ckeditor_plugins_update_data($entity_id) {
+  if (\Drupal::database()->schema()->tableExists('stasco_incoming_links')) {
+    $query = \Drupal::database()->delete('stasco_incoming_links');
+    $query->condition('entity_id', $entity_id);
+    $query->execute();
+  }
+}
+
+/**
+ * Implements hook_preprocess_node().
+ *
+ * Create $incoming_links variable to be used in node templates.
+ */
+function stasco_ckeditor_plugins_preprocess_node(&$variables) {
+  $node = $variables['node'];
+  $links = stasco_ckeditor_plugins_page_incoming_links($node->id());
+  if (!empty($links) && is_array($links)) {
+    // @todo Add additional classes for incoming list items.
+    $incoming_links = [
+      '#theme' => 'item_list',
+      '#list_type' => 'ul',
+      '#title' => t('Incoming links'),
+      '#items' => $links,
+      '#attributes' => ['class' => 'incoming-links'],
+      '#wrapper_attributes' => ['class' => 'container'],
+    ];
+    $variables['incoming_links'] = $incoming_links;
+  }
+}
+
+/**
+ * Get incoming links for a page.
+ *
+ * @param int $entity_id
+ *   Get incoming links for an entity.
+ *
+ * @return array
+ *   Incoming links.
+ */
+function stasco_ckeditor_plugins_page_incoming_links($entity_id) {
+  $incoming_links = [];
+  if (\Drupal::database()->schema()->tableExists('stasco_incoming_links')) {
+    $query = \Drupal::database()
+      ->select('stasco_incoming_links', 'si')
+      ->distinct();
+    $query->addField('si', 'entity_id');
+    $query->condition('si.link_to_entity_id', $entity_id);
+    $result = $query->execute()->fetchAll();
+    if (!empty($result)) {
+      $links = [];
+      // Create an array of node ids to use node_load_multiple.
+      foreach ($result as $key => $id) {
+        $links[] = $id->entity_id;
+      }
+      // Node load multiple to get all the node details.
+      $node_details = \Drupal::entityTypeManager()
+        ->getStorage('node')
+        ->loadMultiple($links);
+      foreach ($node_details as $key => $details) {
+        $node_title = $details->getTitle();
+        $incoming_links[] = Link::createFromRoute($node_title, 'entity.node.canonical', ['node' => $key])
+          ->toString();
+      }
+
+      return $incoming_links;
+    }
+  }
+
+  return $incoming_links;
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function stasco_ckeditor_plugins_entity_view(&$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  if ($entity instanceof NodeInterface && $build['#view_mode'] == 'full') {
+    $body = $entity->body->value;
+    // Get all the links from body part.
+    $doc = \phpQuery::newDocument($body);
+    $links = pq('a[linkextended]');
+    if ($links->elements) {
+      /** @var \DOMElement $element */
+      $entity_link_updated = FALSE;
+      foreach ($links->elements as $element) {
+        $href = $element->getAttribute('href');
+        // Get node id from the string.
+        $link_id = substr($href, strrpos($href, '/') + 1);
+        // Check if it is a valid node id.
+        $link_node = Node::load($link_id);
+        if (is_object($link_node)) {
+          $updated_title = \Drupal::service('stasco.chapters')
+            ->getChapterTitleWithNumbering($link_node->id(), $link_node->getTitle());
+          if ($element->firstChild->textContent != $updated_title) {
+            $entity_link_updated = TRUE;
+          }
+          $element->removeChild($element->firstChild);
+          $element->appendChild(new DOMText($updated_title));
+        }
+      }
+      $body = $doc->html();
+      // Attach updated node body.
+      $build['body'][0]['#text'] = $body;
+      // If there are updated entity links only then save node.
+      if ($entity_link_updated == TRUE) {
+        $entity->body->value = $body;
+        $entity->save();
+      }
+    }
+  }
+}
+
+/**
+ * Alters Stasco views qurey.
+ *
+ * @param \Drupal\views\ViewExecutable $view
+ *   The view.
+ * @param \Drupal\views\Plugin\views\query\Sql $query
+ *   The sql query.
+ */
+function stasco_ckeditor_plugins_views_query_alter(ViewExecutable $view, Sql $query) {
+  if ($view->id() == 'stasco_uploaded_files' && $view->getDisplay()->display['id'] == 'page_1') {
+    $files = \Drupal::service('stasco_ckeditor_plugins.upload_file_manager')
+      ->getStascoFiles();
+    if ($files) {
+      $query->addWhere('conditions', 'file_managed.fid', $files, 'IN');
+    }
+    else {
+      $query->addWhere('conditions', 'file_managed.fid', NULL);
+    }
+  }
+}
